@@ -1,7 +1,6 @@
 import re
 import socket
 import logging
-from emoji import demojize
 from datetime import datetime
 from twitch_calculation import result_calculation
 
@@ -67,6 +66,7 @@ class TwitchChat:
             # result output 
             if temp_input == 'y' or temp_input == 'Y':
                 print(self.raffle_result)
+                print(f"congratulations!!! ####{result_calculation(self.raffle_result)}####")
                 exit()
             elif temp_input == 'n' or temp_input =='N':
                 print(self.raffle_result)
