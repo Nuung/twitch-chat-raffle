@@ -7,7 +7,7 @@ Get token here: https://twitchapps.com/tmi/
 # port = 6667
 # nickname = 'qlgks1'
 # token = 'oauth:zp9ya6rlcec2oiprz2h9pnf66ju6ye'
-# channel = '#hanryang1125' / dopa24
+# channel = '#hanryang1125' / dopa24 / ddubbu7
 """
 
 # 가중치 계산

@@ -1,10 +1,13 @@
 # Twitch Chat (with IRC) Auto Raffle
 
-> about twitch IRC chat [Offical DOCS](https://dev.twitch.tv/docs/irc)
-> about [IRC](https://en.wikipedia.org/wiki/Internet_Relay_Chat)
+> About twitch IRC chat [Offical DOCS](https://dev.twitch.tv/docs/irc) </br> About [IRC](https://en.wikipedia.org/wiki/Internet_Relay_Chat)
 
-## temp
+## Temp
 - temo
 
-## tech
+## Tech
 - temp
+
+--- 
+
+## License

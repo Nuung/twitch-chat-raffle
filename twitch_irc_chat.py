@@ -11,7 +11,7 @@ Get token here: https://twitchapps.com/tmi/
 # server = 'irc.chat.twitch.tv'
 # port = 6667
 # nickname = 'qlgks1'
-# token = 'oauth:zp9ya6rlcec2oiprz2h9pnf66ju6ye'
+# token = 'oauth:'
 # channel = '#hanryang1125' / dopa24
 """
 
