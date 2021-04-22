@@ -8,50 +8,15 @@ body {
     font-family: 'Poppins', sans-serif;
 }
 
-.main-container #nike, #kasina {
-    margin: 10px;
-}
-
-.table .link-name {
+.main {
+    margin: 5%;
     text-align: center;
 }
 
-.table .card-btns {
-    text-align: right;
-}
-
-.btn-intercation {
-    margin: 10px;
+.main > ul {
     text-align: center;
+    justify-content: center;
 }
-
-.active-red {
-    background: red;
-    border: 1px solid red;
-}
-
-.passive-gray {
-    background: gray;
-    border: 1px solid gray;
-}
-
-.custom-checkbox .custom-control-input:checked ~ .custom-control-label::before {
-    border-color: rgb(29, 29, 29);
-    background-color: rgb(29, 29, 29);
-}   
-
-/* ---------------------------------------------------
-    NavBar STYLE
------------------------------------------------------ */
-
-/* ---------------------------------------------------
-    CONTENT STYLE
------------------------------------------------------ */
-
-#content {
-
-}
-
 
 /* ---------------------------------------------------
     Footer
