@@ -1,0 +1,70 @@
+
+@import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700";
+
+.black-background {background-color:#000000;}
+
+
+body {
+    font-family: 'Poppins', sans-serif;
+}
+
+.main-container #nike, #kasina {
+    margin: 10px;
+}
+
+.table .link-name {
+    text-align: center;
+}
+
+.table .card-btns {
+    text-align: right;
+}
+
+.btn-intercation {
+    margin: 10px;
+    text-align: center;
+}
+
+.active-red {
+    background: red;
+    border: 1px solid red;
+}
+
+.passive-gray {
+    background: gray;
+    border: 1px solid gray;
+}
+
+.custom-checkbox .custom-control-input:checked ~ .custom-control-label::before {
+    border-color: rgb(29, 29, 29);
+    background-color: rgb(29, 29, 29);
+}   
+
+/* ---------------------------------------------------
+    NavBar STYLE
+----------------------------------------------------- */
+
+/* ---------------------------------------------------
+    CONTENT STYLE
+----------------------------------------------------- */
+
+#content {
+
+}
+
+
+/* ---------------------------------------------------
+    Footer
+----------------------------------------------------- */
+
+.footer-text {
+    text-align: center;
+}
+
+/* ---------------------------------------------------
+    MEDIAQUERIES
+----------------------------------------------------- */
+
+@media (max-width: 768px) {
+
+}

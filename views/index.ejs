@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="stylesheets/login.css">
+    <link rel="stylesheet" href="./lib/bootstrap/css/bootstrap.min.css">
+    <script src="./lib/jquery/jquery.min.js"></script>
+    <title>AmnotifyKR Login</title>
+</head>
+<body>
+    <div class="main">
+        <img src="images/web_bg.png" class="pc">
+        <img src="images/mo_bg.png" class="mo">
+        <!--배경-->
+
+        <div class="logo">
+            <div class="logo_img"></div>
+            <p>Hello,<br>
+            <span>Sign In!</span></p>
+            <!--logo-->
+            
+            <div class="text">
+                <form action="/login" method="post">
+                    <div class="id">
+                        <input id="login_id" name="username" type="text" class="form-control" placeholder="Username" required autofocus />
+                    </div>
+                    <div class="pass">
+                        <input id="login_pass" name="password" type="password" class="form-control" placeholder="Password" required />
+                    </div>
+                    <div class="in">
+                        <input id="login_action" type="submit" value="Login" class="btn btn-primary btn-block" />
+                    </div>                        
+                </form>
+            </div>
+        </div>
+
+        <div id="wrap">
+            <div class="title-box">
+                <div class='wave -one'></div>
+                <div class='wave -two'></div>
+                <div class='wave -three'></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
