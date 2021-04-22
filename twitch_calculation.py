@@ -17,8 +17,7 @@ def result_calculation(target_result: dict):
     p = np.array(list(target_result.values()), dtype=float)
     p /= p.sum()  # normalize
 
-    # p /= p.sum()
-    raffle_result = np.random.choice(target_key_set, 1, p=p, replace=False)
+    raffle_result = np.random.choice(target_key_set, 1, p=p, replace=False) # 가중치 연산
     return raffle_result
 
 # mian
