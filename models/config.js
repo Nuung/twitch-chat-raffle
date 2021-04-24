@@ -2,6 +2,7 @@ const mongoose = require('mongoose'); // for mongoDB
 const Schema = mongoose.Schema;
  
 const config = new Schema({
+    nick_name: String,
     oauth_token: String,
     channel_name: String,
     created_at: {

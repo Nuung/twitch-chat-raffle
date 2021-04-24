@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose'); // for mongoDB
+const ObjectID = require('mongodb').ObjectID; // for mongoDB's OID
 const router = express.Router();
+const child_process = require('child_process'); // for process checking and running
 
 // env value
 const env = require('dotenv').config(); //add .env file 
@@ -21,6 +23,7 @@ mongoose.connect(`mongodb://${dbConfig.username}:${dbConfig.password}@${dbConfig
 // load DB schema
 const Config = require("../models/config");
 const TwitchRaffleResult = require("../models/twitch_raffle_result");
+const TwitchChatDumps = require("../models/twitch_chat_dumps");
 
 // 넘어온 값이 빈값인지 체크합니다. -> !value 하면 생기는 논리적 오류를 제거하기 위해
 // 명시적으로 value == 사용 / [], {} 도 빈값으로 처리
@@ -57,13 +60,57 @@ router.get('/', function (req, res, next) {
     res.render('index');
 });
 
+// get 실시간 상황 
+router.get('/api/live', function (req, res, next) {
+    TwitchRaffleResult.findById({ "_id": ObjectID('6084495e957d77dac7e864e9') }, function (err, result) {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ result: `Fail: ${err}` });
+        }
+        else res.status(200).json({ result: result['result_json'] });
+    });
+});
+
+// get raffle result
+router.get('/api/raffle', function (req, res, next) {
+    const command = `python3 /home/ubuntu/twitch_calculation.py`;
+    child_process.exec(command, (err, stdout, stdin) => {
+        if (err) res.status(500).json({ result: err });
+        else res.status(200).json({ result: stdout });
+    });
+});
+
 // config setting 
 router.put('/api/config', function (req, res, next) {
-    Config.updateOne({}, result, {
 
+    const newConfig = new Config(req.body);
+    Config.findByIdAndUpdate({ "_id": ObjectID('60827e0d957d77dac7e864e8') }, { "$set": { "nick_name": "test" } }, function (err, result) {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ result: `Fail: ${err}` });
+        }
+        else res.status(201).json({ result: `new Config set up success!` });
     });
+    // res.render('index');
+});
 
-    res.render('index');
+// init request
+router.delete('/api/init', function (req, res, next) {
+    TwitchChatDumps.deleteMany({}, function (err, result) {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ result: `Fail: ${err}` });
+        }
+        else {
+            TwitchRaffleResult.updateOne({ "type": "Leaderboard" }, { "$set": { "result_json": "" } }, function (err, result) {
+                if (err) {
+                    console.error(err);
+                    return res.status(500).json({ result: `Fail: ${err}` });
+                }
+                else res.status(201).json({ result: `Initializing success!` });
+            });
+        }
+    });
 });
 
 module.exports = router;

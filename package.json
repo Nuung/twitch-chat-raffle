@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "node ./www",
-    "start:dev": "nodemon --watch ./route ./www",
+    "start:dev": "nodemon --watch ./routes ./www",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

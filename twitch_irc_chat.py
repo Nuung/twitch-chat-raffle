@@ -34,49 +34,6 @@ class TwitchChat:
                             datefmt='%Y-%m-%d_%H:%M:%S',
                             handlers=[logging.FileHandler('chat.log', encoding='utf-8')])
 
-    # class main Action 부분
-    def chat_connect(self):
-        sock = socket.socket()
-        sock.connect((self.server, self.port))
-        sock.send(f"PASS {self.token}\r\n".encode('utf-8'))
-        sock.send(f"NICK {self.nickname}\r\n".encode('utf-8'))
-        sock.send(f"JOIN {self.channel}\r\n".encode('utf-8'))
-        resp = sock.recv(2048).decode('utf-8') # at first
-
-        try:
-            while True:
-                resp = sock.recv(2048).decode('utf-8')
-                print(self.get_chat_parsing(resp))
-                # print(get_chat_parsing(resp))
-                # if resp.startswith('PING'):
-                #     # sock.send("PONG :tmi.twitch.tv\n".encode('utf-8'))
-                #     sock.send("PONG\n".encode('utf-8'))
-                # elif len(resp) > 0:
-                #     logging.info(get_chat_parsing(demojize(resp))) 
-        
-        # ctrl + c -> exit (end)
-        # except KeyboardInterrupt:
-        #     sock.close()
-        #     logging.info(self.raffle_result)
-        #     # result chk and input 
-        #     temp_input = input("if you want to see result right now? (y/n) >> ")
-        #     while temp_input != 'y' and temp_input != 'Y' and temp_input != 'n' and temp_input != 'N':
-        #         temp_input = input("please! input fuxking correct answer! (y/n) >> ")
-
-        #     # result output 
-        #     if temp_input == 'y' or temp_input == 'Y':
-        #         print(self.raffle_result)
-        #         print(f"congratulations!!! ####{result_calculation(self.raffle_result)}####")
-        #         exit()
-        #     elif temp_input == 'n' or temp_input =='N':
-        #         print(self.raffle_result)
-        #         print("Bye! checkout chat.log or run twitch_calculation.py")
-        #         exit()
-
-        # other exception
-        except Exception as e:
-            print(f"chat_connect and getting msg error: {e}, {type(e).__name__}, {type(e)}")
-
     # chatting parsing -> target 데이터 추출
     def get_chat_parsing(self, txt: str):
         try:
@@ -127,6 +84,8 @@ def get_main_client():
                         authSource=db_info['role'])
     return client['twitch_raffle']
 
+def is_on():
+    print()
 
 # mian
 if __name__ == '__main__':
@@ -138,7 +97,19 @@ if __name__ == '__main__':
     # 1. db.config에서 nick_name, oauth_token, channel_name 가져와서 세팅 가능
     # print(config_info['nick_name'], config_info['oauth_token'], config_info['channel_name'])   
     twitch_chat = TwitchChat(config_info['nick_name'], config_info['oauth_token'], config_info['channel_name'])
-    twitch_chat.chat_connect() 
+    
+    # 2. main while true
+    sock = socket.socket()
+    sock.connect((twitch_chat.server, twitch_chat.port))
+    sock.send(f"PASS {twitch_chat.token}\r\n".encode('utf-8'))
+    sock.send(f"NICK {twitch_chat.nickname}\r\n".encode('utf-8'))
+    sock.send(f"JOIN {twitch_chat.channel}\r\n".encode('utf-8'))
+    resp = sock.recv(2048).decode('utf-8') # at first
 
-    # twitch_chat.raffle_result (dict) 기반으로 확률 계산하고 뽑아야함
-    # 가중치 확률 계산 뽑기 정도로 생각하자 
+    while True:
+        try: 
+            resp = sock.recv(2048).decode('utf-8')
+            twitch_chat.get_chat_parsing(resp)
+        except Exception as e: 
+            print(f"chat_connect and getting msg error: {e}, {type(e).__name__}, {type(e)}")
+            continue
