@@ -1,11 +1,20 @@
 
-@import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700";
+@font-face {
+    font-family: 'Recipekorea';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/Recipekorea.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+:root {
+    --main-bg-color: blue;
+}
 
 .black-background {background-color:#000000;}
 
 
 body {
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Recipekorea' !important
 }
 
 .main {
@@ -14,8 +23,22 @@ body {
 }
 
 .main > ul {
+    margin: 10px;
+    border: 10px;
     text-align: center;
     justify-content: center;
+}
+
+.main > ul > li:nth-child(1) {
+    width: 100px;
+}
+
+.main > ul > li:nth-child(2) {
+    width: 400px;
+}
+
+.main > ul > li:nth-child(3) {
+    width: 100px;
 }
 
 /* ---------------------------------------------------
