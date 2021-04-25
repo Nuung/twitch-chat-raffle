@@ -67,7 +67,7 @@ router.get('/api/live', function (req, res, next) {
             console.error(err);
             return res.status(500).json({ result: `Fail: ${err}` });
         }
-        else res.status(200).json({ result: result['result_json'] });
+        else return res.status(200).json({ result: result['result_json'] });
     });
 });
 

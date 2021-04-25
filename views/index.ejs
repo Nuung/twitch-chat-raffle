@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="stylesheets/style.css">
     <link rel="stylesheet" href="library/bootstrap/css/bootstrap.min.css">
     <script src="library/jquery/jquery.min.js"></script>
+    <script src="library/sweetalert.min.js"></script>
     <title>AmnotifyKR Login</title>
 </head>
 
@@ -48,8 +49,76 @@
             <li class="list-group-item">#1</li>
             <li class="list-group-item">qlgks1</li>
             <li class="list-group-item">50</li>
-        </ul>                                        
+        </ul>
     </div>
 </body>
+<script>
+    const randerTarget = document.querySelector(".main");
+
+    // Long Polling
+    /*
+     데이터베이스 처리중 커넥션 풀 기법이 있는데 비슷한 개념이다. 서버와 접속을 열어둔 상태에서 요청이 오면 바로 바로 처리한다. 
+     요청이 없을시에는 리소스를 거의 먹지않는다. 아래의 원문을 보면 이해가 쉬울 것 같다.
+    */
+    (function boardUpdate() {
+        $.ajax({
+            url: '/api/live',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                // 1. main의 ul 모두 삭제
+                const targetUl = randerTarget.querySelectorAll('ul');
+                for (let i = 0; i < targetUl.length; i++) targetUl[i].remove();
+
+                // 2. 받아온 result 값 value기반으로 정렬 
+                const sortedResult = Object.entries(response['result'])
+                    .sort(([, a], [, b]) => b - a)
+                    .reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
+
+                // 3. 정렬된 값 기준으로 랜더링 
+                let cnt = 1;
+                for (const [key, value] of Object.entries(sortedResult)) {
+                    $('div.main').append(
+                        `
+                    <ul class="list-group list-group-horizontal">
+                        <li class="list-group-item">${cnt++}</li>
+                        <li class="list-group-item">${key}</li>
+                        <li class="list-group-item">${value}</li>
+                    </ul>
+                    `
+                    );
+                }
+            },
+            error: function (e) {
+                console.log("ERROR : ", e);
+            },
+            timeout: 2000,
+            complete: setTimeout(function () { boardUpdate(); }, 3000)
+        })
+    })();
+
+
+    // nike_wish페이지에서 타겟 유저 삭제
+    /*
+    function deleteWishUsers() {
+        $(".restock-item-list").on("click", "button", function () {
+            const id = $(this).attr('target-link');
+            $.ajax({
+                type: "GET",
+                url: "/api/live",
+                dataType: "json",
+                // data: { id },
+                success: function (result) {
+                    swal("Delete Success", result['result'], "success");
+                },
+                error: function (e) {
+                    console.log("ERROR : ", e);
+                    swal("Delete Fail", `${attr} 링크를 제거 에러: ${e}`, "error");
+                }
+            }); // ajax
+        });
+    }
+    */
+</script>
 
 </html>

@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
  
 const twitch_raffle_result = new Schema({
     type: String,
-    result_json: String,
+    result_json: Object,
     created_at: {
         type: Date,
         default: Date.now

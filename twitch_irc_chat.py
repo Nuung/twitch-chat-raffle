@@ -4,6 +4,7 @@ import logging
 from datetime import datetime
 from twitch_calculation import result_calculation
 from pymongo import MongoClient
+from time import sleep
 
 """
 Get token here: https://twitchapps.com/tmi/
@@ -84,8 +85,9 @@ def get_main_client():
                         authSource=db_info['role'])
     return client['twitch_raffle']
 
-def is_on():
+def is_on(db):
     print()
+    return False
 
 # mian
 if __name__ == '__main__':
@@ -95,7 +97,6 @@ if __name__ == '__main__':
 
     # twitch object만들고 바로 IRC 
     # 1. db.config에서 nick_name, oauth_token, channel_name 가져와서 세팅 가능
-    # print(config_info['nick_name'], config_info['oauth_token'], config_info['channel_name'])   
     twitch_chat = TwitchChat(config_info['nick_name'], config_info['oauth_token'], config_info['channel_name'])
     
     # 2. main while true
@@ -107,9 +108,14 @@ if __name__ == '__main__':
     resp = sock.recv(2048).decode('utf-8') # at first
 
     while True:
+
+        # 3. on / off check 
+        # if is_on(db):
         try: 
             resp = sock.recv(2048).decode('utf-8')
             twitch_chat.get_chat_parsing(resp)
         except Exception as e: 
             print(f"chat_connect and getting msg error: {e}, {type(e).__name__}, {type(e)}")
             continue
+        # else:
+        #     sleep(5)
