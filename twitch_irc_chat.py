@@ -86,8 +86,7 @@ def get_main_client():
     return client['twitch_raffle']
 
 def is_on(db):
-    print()
-    return False
+    return db.on_off_check.find({})[0]['status']
 
 # mian
 if __name__ == '__main__':
@@ -98,24 +97,35 @@ if __name__ == '__main__':
     # twitch object만들고 바로 IRC 
     # 1. db.config에서 nick_name, oauth_token, channel_name 가져와서 세팅 가능
     twitch_chat = TwitchChat(config_info['nick_name'], config_info['oauth_token'], config_info['channel_name'])
-    
-    # 2. main while true
-    sock = socket.socket()
-    sock.connect((twitch_chat.server, twitch_chat.port))
-    sock.send(f"PASS {twitch_chat.token}\r\n".encode('utf-8'))
-    sock.send(f"NICK {twitch_chat.nickname}\r\n".encode('utf-8'))
-    sock.send(f"JOIN {twitch_chat.channel}\r\n".encode('utf-8'))
-    resp = sock.recv(2048).decode('utf-8') # at first
-
+    is_need_init = True
     while True:
+        # 2. create chat connection 
+        if is_on(db) and is_need_init:
+            print("init connection")
+            is_need_init = False
+            sock = socket.socket()
+            sock.connect((twitch_chat.server, twitch_chat.port))
+            sock.send(f"PASS {twitch_chat.token}\r\n".encode('utf-8'))
+            sock.send(f"NICK {twitch_chat.nickname}\r\n".encode('utf-8'))
+            sock.send(f"JOIN {twitch_chat.channel}\r\n".encode('utf-8'))
+            resp = sock.recv(2048).decode('utf-8') # at first            
 
         # 3. on / off check 
-        # if is_on(db):
-        try: 
-            resp = sock.recv(2048).decode('utf-8')
-            twitch_chat.get_chat_parsing(resp)
-        except Exception as e: 
-            print(f"chat_connect and getting msg error: {e}, {type(e).__name__}, {type(e)}")
-            continue
-        # else:
-        #     sleep(5)
+        if is_on(db) and is_need_init == False:
+            print("get chat")
+            try: 
+                resp = sock.recv(2048).decode('utf-8')
+                twitch_chat.get_chat_parsing(resp)
+            except Exception as e: 
+                # print(f"chat_connect and getting msg error: {e}, {type(e).__name__}, {type(e)}")
+                pass
+        else:
+            try:
+                print("close sock")
+                sock.close()
+            except Exception as e: 
+                pass
+            
+            print("end up")
+            is_need_init = True
+            sleep(5)

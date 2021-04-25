@@ -60,6 +60,25 @@ router.get('/', function (req, res, next) {
     res.render('index');
 });
 
+// on off status update
+router.put('/api/onoff', function (req, res, next) {
+    mongoose.connection.db.collection("on_off_check", function (err, collection) {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ result: `Fail: ${err}` });
+        }
+        else {
+            collection.findOneAndUpdate({ "_id": ObjectID('6084495e957d77dac7e864e9') }, { "$set": { status: req.body.status } }, function (update_err, result) {
+                if (update_err) {
+                    console.error(update_err);
+                    return res.status(500).json({ result: `Fail: ${err}` });
+                }
+                else return res.status(201).json({ result: result });
+            });
+        }
+    });
+});
+
 // get 실시간 상황 
 router.get('/api/live', function (req, res, next) {
     TwitchRaffleResult.findById({ "_id": ObjectID('6084495e957d77dac7e864e9') }, function (err, result) {

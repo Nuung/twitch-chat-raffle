@@ -19,37 +19,11 @@
             <button>Setting</button>
             <button>Raffle</button>
         </div>
-
-        <ul class="list-group list-group-horizontal">
+        <!-- <ul class="list-group list-group-horizontal">
             <li class="list-group-item">#1</li>
             <li class="list-group-item">qlgks1</li>
             <li class="list-group-item">50</li>
-        </ul>
-        <ul class="list-group list-group-horizontal">
-            <li class="list-group-item">#1</li>
-            <li class="list-group-item">qlgks1</li>
-            <li class="list-group-item">50</li>
-        </ul>
-        <ul class="list-group list-group-horizontal">
-            <li class="list-group-item">#1</li>
-            <li class="list-group-item">qlgks1</li>
-            <li class="list-group-item">50</li>
-        </ul>
-        <ul class="list-group list-group-horizontal">
-            <li class="list-group-item">#1</li>
-            <li class="list-group-item">qlgks1</li>
-            <li class="list-group-item">50</li>
-        </ul>
-        <ul class="list-group list-group-horizontal">
-            <li class="list-group-item">#1</li>
-            <li class="list-group-item">qlgks1</li>
-            <li class="list-group-item">50</li>
-        </ul>
-        <ul class="list-group list-group-horizontal">
-            <li class="list-group-item">#1</li>
-            <li class="list-group-item">qlgks1</li>
-            <li class="list-group-item">50</li>
-        </ul>
+        </ul> -->
     </div>
 </body>
 <script>
@@ -76,14 +50,14 @@
                     .reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
 
                 // 3. 정렬된 값 기준으로 랜더링 
-                let cnt = 1;
+                let cnt = 1; // rank
                 for (const [key, value] of Object.entries(sortedResult)) {
                     $('div.main').append(
-                        `
+                    `
                     <ul class="list-group list-group-horizontal">
                         <li class="list-group-item">${cnt++}</li>
-                        <li class="list-group-item">${key}</li>
-                        <li class="list-group-item">${value}</li>
+                        <li class="list-group-item chat-log-li" target-data-id="${key}">${key}</li>
+                        <li class="list-group-item chat-cnt-li" target-data-id="${key}">${value}</li>
                     </ul>
                     `
                     );
@@ -97,28 +71,18 @@
         })
     })();
 
+    // chat-log-li 에는 this(target-data-id) key에 따른 채팅 로그 pop up
 
-    // nike_wish페이지에서 타겟 유저 삭제
-    /*
-    function deleteWishUsers() {
-        $(".restock-item-list").on("click", "button", function () {
-            const id = $(this).attr('target-link');
-            $.ajax({
-                type: "GET",
-                url: "/api/live",
-                dataType: "json",
-                // data: { id },
-                success: function (result) {
-                    swal("Delete Success", result['result'], "success");
-                },
-                error: function (e) {
-                    console.log("ERROR : ", e);
-                    swal("Delete Fail", `${attr} 링크를 제거 에러: ${e}`, "error");
-                }
-            }); // ajax
-        });
-    }
-    */
+    // chat-cnt-li 에는 this(target-data-id) key에 따른 cnt update가능
+
+    // init 
+
+    // on / off 
+
+    // setting (configue set up / nick-name, channel, oauth-token)
+
+    // raffle ~ run python3 process
+
 </script>
 
 </html>
