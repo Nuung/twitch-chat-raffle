@@ -8,6 +8,7 @@ from time import sleep
 
 """
 Get token here: https://twitchapps.com/tmi/
+https://www.learndatasci.com/tutorials/how-stream-text-data-twitch-sockets-python/ 
 
 # server = 'irc.chat.twitch.tv'
 # port = 6667
@@ -26,7 +27,8 @@ class TwitchChat:
         self.token = oauth_token
         self.channel = '#' + channel
         self.loggin_config()
-        self.raffle_result = {}
+        if db.twitch_raffle_result.find({})[0]['result_json'] == "": self.raffle_result = {}
+        else: db.twitch_raffle_result.find({})[0]['result_json']
 
     # 기본 loggin setting
     def loggin_config(self):
@@ -92,10 +94,10 @@ def is_on(db):
 if __name__ == '__main__':
     # db config
     db = get_main_client()
-    config_info = db.config.find({})[0]
 
     # twitch object만들고 바로 IRC 
     # 1. db.config에서 nick_name, oauth_token, channel_name 가져와서 세팅 가능
+    config_info = db.config.find({})[0]
     twitch_chat = TwitchChat(config_info['nick_name'], config_info['oauth_token'], config_info['channel_name'])
     is_need_init = True
 
@@ -103,21 +105,23 @@ if __name__ == '__main__':
         # 2. create chat connection 
         if is_on(db) and is_need_init:
             print("init connection")
+            config_info = db.config.find({})[0]
+            twitch_chat = TwitchChat(config_info['nick_name'], config_info['oauth_token'], config_info['channel_name'])
             is_need_init = False
             sock = socket.socket()
+            sock.settimeout(3000)
             sock.connect((twitch_chat.server, twitch_chat.port))
             sock.send(f"PASS {twitch_chat.token}\r\n".encode('utf-8'))
             sock.send(f"NICK {twitch_chat.nickname}\r\n".encode('utf-8'))
             sock.send(f"JOIN {twitch_chat.channel}\r\n".encode('utf-8'))
             resp = sock.recv(2048).decode('utf-8') # at first            
-
-        # 3. on / off check 
-        if is_on(db) and is_need_init == False: # on
+        elif is_on(db) and is_need_init == False: # 3. on / off check -> on
             try: 
                 resp = sock.recv(2048).decode('utf-8')
-                print(twitch_chat.get_chat_parsing(resp))
+                if resp.startswith('PING'): sock.send("PONG\n".encode('utf-8'))
+                elif len(resp) > 0: print(twitch_chat.get_chat_parsing(resp))
             except Exception as e: 
-                # print(f"chat_connect and getting msg error: {e}, {type(e).__name__}, {type(e)}")
+                print(f"error: {e}, {type(e).__name__}, {type(e)}")
                 pass
         else: # off -> sock close and need obj init
             try:
@@ -127,6 +131,5 @@ if __name__ == '__main__':
                 pass
             
             print("end up")
-            twitch_chat.raffle_result = {}
             is_need_init = True
             sleep(5)

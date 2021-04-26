@@ -29,11 +29,18 @@ body {
     justify-content: center;
 }
 
+#logo-img {
+    margin: 10px;
+    border-radius: 100%;
+}
+
 /* List of leader-board-list -> 상위권 하이라이팅 */
-.leader-board-list > li {
+
+.leader-board-list>li {
     background-color: rgb(181, 181, 181);
     color: white;
 }
+
 .leader-board-list:nth-of-type(1)>li {
     background-color: rgb(160, 49, 245) !important;
 }

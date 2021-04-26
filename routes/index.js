@@ -71,6 +71,24 @@ router.get('/api/live', function (req, res, next) {
     });
 });
 
+// get 실시간 상황 Cnt by id!
+router.get('/api/live/:id', function (req, res, next) {
+    TwitchRaffleResult.findById({ "_id": ObjectID('6084495e957d77dac7e864e9') }, function (err, result) {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ result: `Fail: ${err}` });
+        }
+        else {
+            const result_json = result['result_json'];
+            for (const [key, value] of Object.entries(result_json)) {
+                if (key == req.params.id) {
+                    return res.status(200).json({ result: value });
+                }
+            }
+        }
+    });
+});
+
 // get raffle result
 router.get('/api/raffle', function (req, res, next) {
     const command = `python3 /home/ubuntu/twitch_calculation.py`;
@@ -102,6 +120,25 @@ router.get('/api/config', function (req, res, next) {
     });
 });
 
+// get status 
+router.get('/api/onoff', function (req, res, next) {
+    mongoose.connection.db.collection("on_off_check", function (err, collection) {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ result: `Fail: ${err}` });
+        }
+        else {
+            collection.findOne({ "_id": ObjectID('6085c8b8957d77dac7e864ea') }, function (findOne_err, result) {
+                if (findOne_err) {
+                    console.error(findOne_err);
+                    return res.status(500).json({ result: `Fail: ${findOne_err}` });
+                }
+                else return res.status(200).json({ result: result });
+            });
+        }
+    });
+});
+
 
 // config setting 
 router.put('/api/config', function (req, res, next) {
@@ -127,16 +164,18 @@ router.put('/api/onoff', function (req, res, next) {
             return res.status(500).json({ result: `Fail: ${err}` });
         }
         else {
-            collection.findOneAndUpdate({ "_id": ObjectID('6085c8b8957d77dac7e864ea') }, { "$set": { status: req.body.status } }, function (update_err, result) {
-                if (update_err) {
-                    console.error(update_err);
-                    return res.status(500).json({ result: `Fail: ${err}` });
+            let changedStatus = false;
+            if (req.body.status == "true") changedStatus = true;
+            collection.findOneAndUpdate({ "_id": ObjectID('6085c8b8957d77dac7e864ea') },
+                { "$set": { status: changedStatus } },
+                function (update_err, result) {
+                    if (update_err) {
+                        console.error(update_err);
+                        return res.status(500).json({ result: `Fail: ${update_err}` });
+                    }
+                    else return res.status(201).json({ result: `ON/OFF Updated Well by ${req.body.status}` });
                 }
-                else {
-                    console.dir(result);
-                    return res.status(201).json({ result: result });
-                }
-            });
+            );
         }
     });
 });
