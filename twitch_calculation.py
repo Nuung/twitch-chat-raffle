@@ -45,7 +45,7 @@ if __name__ == '__main__':
     #     raffle_prise_user = result_calculation(target_line)
 
     raffle_prise_user = result_calculation(config_info['result_json'])
-    print(f"congratulations!!! ####{raffle_prise_user}####")
-        
+    print(f"congratulations! {raffle_prise_user}!")
+
 
 

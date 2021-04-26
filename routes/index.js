@@ -60,25 +60,6 @@ router.get('/', function (req, res, next) {
     res.render('index');
 });
 
-// on off status update
-router.put('/api/onoff', function (req, res, next) {
-    mongoose.connection.db.collection("on_off_check", function (err, collection) {
-        if (err) {
-            console.error(err);
-            return res.status(500).json({ result: `Fail: ${err}` });
-        }
-        else {
-            collection.findOneAndUpdate({ "_id": ObjectID('6084495e957d77dac7e864e9') }, { "$set": { status: req.body.status } }, function (update_err, result) {
-                if (update_err) {
-                    console.error(update_err);
-                    return res.status(500).json({ result: `Fail: ${err}` });
-                }
-                else return res.status(201).json({ result: result });
-            });
-        }
-    });
-});
-
 // get 실시간 상황 
 router.get('/api/live', function (req, res, next) {
     TwitchRaffleResult.findById({ "_id": ObjectID('6084495e957d77dac7e864e9') }, function (err, result) {
@@ -99,19 +80,67 @@ router.get('/api/raffle', function (req, res, next) {
     });
 });
 
-// config setting 
-router.put('/api/config', function (req, res, next) {
-
-    const newConfig = new Config(req.body);
-    Config.findByIdAndUpdate({ "_id": ObjectID('60827e0d957d77dac7e864e8') }, { "$set": { "nick_name": "test" } }, function (err, result) {
+// get target ID's chat log
+router.get('/api/chat/:id', function (req, res, next) {
+    TwitchChatDumps.find({ "username": req.params.id }, function (err, result) {
         if (err) {
             console.error(err);
             return res.status(500).json({ result: `Fail: ${err}` });
         }
-        else res.status(201).json({ result: `new Config set up success!` });
+        else return res.status(201).json({ result: result });
     });
-    // res.render('index');
 });
+
+// get Configue
+router.get('/api/config', function (req, res, next) {
+    Config.findById({ "_id": ObjectID('60827e0d957d77dac7e864e8') }, function (err, result) {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ result: `Fail: ${err}` });
+        }
+        else res.status(200).json({ result: result });
+    });
+});
+
+
+// config setting 
+router.put('/api/config', function (req, res, next) {
+    Config.updateOne({ "_id": ObjectID('60827e0d957d77dac7e864e8') },
+        { "$set": { "nick_name": req.body.nick_name, "oauth_token": req.body.oauth_token, "channel_name": req.body.channel_name, "updated_at": new Date() } },
+        function (err, result) {
+            console.log(result);
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ result: `Fail: ${err}` });
+            }
+            else res.status(201).json({ result: `new Config set up success!` });
+        }
+    );
+});
+
+
+// on off status update
+router.put('/api/onoff', function (req, res, next) {
+    mongoose.connection.db.collection("on_off_check", function (err, collection) {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ result: `Fail: ${err}` });
+        }
+        else {
+            collection.findOneAndUpdate({ "_id": ObjectID('6085c8b8957d77dac7e864ea') }, { "$set": { status: req.body.status } }, function (update_err, result) {
+                if (update_err) {
+                    console.error(update_err);
+                    return res.status(500).json({ result: `Fail: ${err}` });
+                }
+                else {
+                    console.dir(result);
+                    return res.status(201).json({ result: result });
+                }
+            });
+        }
+    });
+});
+
 
 // init request
 router.delete('/api/init', function (req, res, next) {
