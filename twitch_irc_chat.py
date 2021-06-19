@@ -1,6 +1,7 @@
 import re
 import socket
 import logging
+import time
 from datetime import datetime
 from twitch_calculation import result_calculation
 from pymongo import MongoClient
@@ -102,34 +103,46 @@ if __name__ == '__main__':
     is_need_init = True
 
     while True:
-        # 2. create chat connection 
-        if is_on(db) and is_need_init:
-            print("init connection")
-            config_info = db.config.find({})[0]
-            twitch_chat = TwitchChat(config_info['nick_name'], config_info['oauth_token'], config_info['channel_name'])
-            is_need_init = False
-            sock = socket.socket()
-            sock.settimeout(3000)
-            sock.connect((twitch_chat.server, twitch_chat.port))
-            sock.send(f"PASS {twitch_chat.token}\r\n".encode('utf-8'))
-            sock.send(f"NICK {twitch_chat.nickname}\r\n".encode('utf-8'))
-            sock.send(f"JOIN {twitch_chat.channel}\r\n".encode('utf-8'))
-            resp = sock.recv(2048).decode('utf-8') # at first            
-        elif is_on(db) and is_need_init == False: # 3. on / off check -> on
-            try: 
-                resp = sock.recv(2048).decode('utf-8')
-                if resp.startswith('PING'): sock.send("PONG\n".encode('utf-8'))
-                elif len(resp) > 0: print(twitch_chat.get_chat_parsing(resp))
-            except Exception as e: 
-                print(f"error: {e}, {type(e).__name__}, {type(e)}")
-                pass
-        else: # off -> sock close and need obj init
-            try:
-                print("close sock")
-                sock.close()
-            except Exception as e: 
-                pass
-            
-            print("end up")
-            is_need_init = True
-            sleep(5)
+        try:
+            # 2. create chat connection 
+            if is_on(db) and is_need_init:
+                now = time.localtime()
+                print("----------------------------------------------------------------------------")
+                print(f"{now.tm_year}/{now.tm_mon}/{now.tm_mday} {now.tm_hour}:{now.tm_min}:{now.tm_sec} [ ON >> init connection ]")
+                config_info = db.config.find({})[0]
+                twitch_chat = TwitchChat(config_info['nick_name'], config_info['oauth_token'], config_info['channel_name'])
+                is_need_init = False
+                sock = socket.socket()
+                sock.settimeout(3000)
+                sock.connect((twitch_chat.server, twitch_chat.port))
+                sock.send(f"PASS {twitch_chat.token}\r\n".encode('utf-8'))
+                sock.send(f"NICK {twitch_chat.nickname}\r\n".encode('utf-8'))
+                sock.send(f"JOIN {twitch_chat.channel}\r\n".encode('utf-8'))
+                resp = sock.recv(2048).decode('utf-8') # at first
+
+            # 3. After init => on / off check -> on
+            elif is_on(db) and is_need_init == False: 
+                try: 
+                    resp = sock.recv(2048).decode('utf-8')
+                    if resp.startswith('PING'): sock.send("PONG\n".encode('utf-8'))
+                    elif len(resp) > 0: print(twitch_chat.get_chat_parsing(resp))
+                except Exception as e: 
+                    print(f"{now.tm_year}/{now.tm_mon}/{now.tm_mday} {now.tm_hour}:{now.tm_min}:{now.tm_sec} [ error: {e}, {type(e).__name__}, {type(e)} ]")
+                    pass
+
+            # 4. After init => off(off at first)
+            elif is_need_init == False: 
+                try:
+                    print(f"{now.tm_year}/{now.tm_mon}/{now.tm_mday} {now.tm_hour}:{now.tm_min}:{now.tm_sec} [ OFF >> close sock ]")
+                    print("close sock")
+                    sock.close()
+                except Exception as e: pass
+                is_need_init = True
+                sleep(5)
+
+            # 5. wait for start
+            else: sleep(10)
+
+        except Exception as e: 
+            print(f"{now.tm_year}/{now.tm_mon}/{now.tm_mday} {now.tm_hour}:{now.tm_min}:{now.tm_sec} [ error in while true : {e}, {type(e).__name__}, {type(e)} ]")
+            continue
