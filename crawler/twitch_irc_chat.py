@@ -1,12 +1,3 @@
-import re
-import socket
-import logging
-import time
-from datetime import datetime
-from twitch_calculation import result_calculation
-from pymongo import MongoClient
-from time import sleep
-
 """
 Get token here: https://twitchapps.com/tmi/
 https://www.learndatasci.com/tutorials/how-stream-text-data-twitch-sockets-python/ 
@@ -17,6 +8,15 @@ https://www.learndatasci.com/tutorials/how-stream-text-data-twitch-sockets-pytho
 # token = 'oauth:'
 # channel = '#hanryang1125' / dopa24
 """
+
+import re
+import socket
+import logging
+import time
+from datetime import datetime
+from twitch_calculation import result_calculation
+from pymongo import MongoClient
+from time import sleep
 
 class TwitchChat:
 
@@ -125,7 +125,7 @@ if __name__ == '__main__':
                 try: 
                     resp = sock.recv(2048).decode('utf-8')
                     if resp.startswith('PING'): sock.send("PONG\n".encode('utf-8'))
-                    elif len(resp) > 0: print(twitch_chat.get_chat_parsing(resp))
+                    elif len(resp) > 0: twitch_chat.get_chat_parsing(resp)
                 except Exception as e: 
                     print(f"{now.tm_year}/{now.tm_mon}/{now.tm_mday} {now.tm_hour}:{now.tm_min}:{now.tm_sec} [ error: {e}, {type(e).__name__}, {type(e)} ]")
                     pass
@@ -134,7 +134,6 @@ if __name__ == '__main__':
             elif is_need_init == False: 
                 try:
                     print(f"{now.tm_year}/{now.tm_mon}/{now.tm_mday} {now.tm_hour}:{now.tm_min}:{now.tm_sec} [ OFF >> close sock ]")
-                    print("close sock")
                     sock.close()
                 except Exception as e: pass
                 is_need_init = True

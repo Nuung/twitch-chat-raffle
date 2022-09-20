@@ -6,7 +6,7 @@ const twitch_chat_dumps = new Schema({
     channel: String,
     username: String,
     message: String
-});
+}, { versionKey: false });
 
 twitch_chat_dumps.set('collection', 'twitch_chat_dumps'); // collection 이름 정하기
 module.exports = mongoose.model('twitch_chat_dumps', twitch_chat_dumps);

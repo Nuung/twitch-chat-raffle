@@ -86,7 +86,7 @@
     const raffleBtn = document.getElementById("raffle-btn");
 
     // AJAX Custom
-    function ajaxCustom(url, type, next) {
+    const ajaxCustom = (url, type, next) => {
         $.ajax({
             url: url,
             type: type,
@@ -102,7 +102,7 @@
 
 
     // chat-log-li 에는 this(target-data-id) key에 따른 채팅 로그 pop up
-    function addChatRequest() {
+    const addChatRequest = () => {
         // Get ALL Target DOM
         const targetList = document.querySelectorAll(".chat-log-li");
         // add Event
