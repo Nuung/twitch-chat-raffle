@@ -1,0 +1,64 @@
+version: "3.5"
+
+services:
+  tcr-nginx:
+    image: nginx
+    hostname: tcr-nginx
+    container_name: tcr-nginx
+    volumes:
+      - ../nginx/conf/nginx.conf:/etc/nginx/nginx.conf
+      - ../nginx/conf.d:/etc/nginx/conf.d
+      - ../app/public:/etc/nginx/public
+      # - ../fpm-be/media:/etc/nginx/media
+      # - ../fpm-fe-html/:/usr/share/nginx
+      - ./nginx/log:/var/log/nginx
+    ports:
+      - "80:80"
+    environment:
+      - NGINX_PORT=80
+    networks:
+      - twitch-chat-raffle-network
+    depends_on:
+      - tcr-app
+
+  tcr-app:
+    image: tcr-app
+    hostname: tcr-app
+    container_name: tcr-app    
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGO_HOST=tcr-mongodb
+    networks:
+      - twitch-chat-raffle-network
+    depends_on:
+      - tcr-mongodb
+
+  tcr-crawler:
+    image: tcr-crawler
+    hostname: tcr-crawler
+    container_name: tcr-crawler    
+    networks:
+      - twitch-chat-raffle-network    
+
+  tcr-mongodb:
+    image: mongo
+    hostname: tcr-mongodb
+    container_name: tcr-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - ../mongodb/data:/data/db
+      - ../mongodb/cnf:/etc/mongo
+      - ../mongodb/log:/var/log/mongodb
+    entrypoint: ["mongod", "-f", "/etc/mongo/mongod.conf"]
+    env_file: .env
+    environment:
+      TZ: Asia/Seoul
+    networks:
+      - twitch-chat-raffle-network
+    restart: always
+
+networks:
+  twitch-chat-raffle-network:
+    driver: bridge

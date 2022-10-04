@@ -25,34 +25,6 @@ const Config = require("../models/config");
 const TwitchRaffleResult = require("../models/twitch_raffle_result");
 const TwitchChatDumps = require("../models/twitch_chat_dumps");
 
-// 넘어온 값이 빈값인지 체크합니다. -> !value 하면 생기는 논리적 오류를 제거하기 위해
-// 명시적으로 value == 사용 / [], {} 도 빈값으로 처리
-const isAllEmpty = function (value) {
-    if (value == "" || value == null || value == undefined || (value != null && typeof value == "object" && !Object.keys(value).length)) {
-        return true
-    } else {
-        return false
-    }
-};
-
-//────────────────────────────────────────────────────────────────────────────────────────────//
-
-/* MongoDB collection function setting */
-
-// find collection 
-function find(name, query, cb) {
-    mongoose.connection.db.collection(name, function (err, collection) {
-        collection.find(query).toArray(cb);
-    });
-}
-
-// deleteData collection 
-function deleteData(name, query) {
-    mongoose.connection.db.collection(name, function (err, collection) {
-        collection.deleteOne(query);
-    });
-}
-
 //────────────────────────────────────────────────────────────────────────────────────────────//
 
 // login page
@@ -89,6 +61,8 @@ router.get('/api/live/:id', function (req, res, next) {
     });
 });
 
+//────────────────────────────────────────────────────────────────────────────────────────────//
+
 // get raffle result
 router.get('/api/raffle', function (req, res, next) {
     const command = `python3 /home/ubuntu/twitch_calculation.py`;
@@ -97,6 +71,8 @@ router.get('/api/raffle', function (req, res, next) {
         else res.status(200).json({ result: stdout });
     });
 });
+
+//────────────────────────────────────────────────────────────────────────────────────────────//
 
 // get target ID's chat log
 router.get('/api/chat/:id', function (req, res, next) {
@@ -109,6 +85,8 @@ router.get('/api/chat/:id', function (req, res, next) {
     });
 });
 
+//────────────────────────────────────────────────────────────────────────────────────────────//
+
 // get Configue
 router.get('/api/config', function (req, res, next) {
     Config.findById({ "_id": ObjectID('60827e0d957d77dac7e864e8') }, function (err, result) {
@@ -119,6 +97,23 @@ router.get('/api/config', function (req, res, next) {
         else res.status(200).json({ result: result });
     });
 });
+
+// config setting 
+router.put('/api/config', function (req, res, next) {
+    Config.updateOne({ "_id": ObjectID('60827e0d957d77dac7e864e8') },
+        { "$set": { "nick_name": req.body.nick_name, "oauth_token": req.body.oauth_token, "channel_name": req.body.channel_name, "updated_at": new Date() } },
+        function (err, result) {
+            console.log(result);
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ result: `Fail: ${err}` });
+            }
+            else res.status(201).json({ result: `new Config set up success!` });
+        }
+    );
+});
+
+//────────────────────────────────────────────────────────────────────────────────────────────//
 
 // get status 
 router.get('/api/onoff', function (req, res, next) {
@@ -138,23 +133,6 @@ router.get('/api/onoff', function (req, res, next) {
         }
     });
 });
-
-
-// config setting 
-router.put('/api/config', function (req, res, next) {
-    Config.updateOne({ "_id": ObjectID('60827e0d957d77dac7e864e8') },
-        { "$set": { "nick_name": req.body.nick_name, "oauth_token": req.body.oauth_token, "channel_name": req.body.channel_name, "updated_at": new Date() } },
-        function (err, result) {
-            console.log(result);
-            if (err) {
-                console.error(err);
-                return res.status(500).json({ result: `Fail: ${err}` });
-            }
-            else res.status(201).json({ result: `new Config set up success!` });
-        }
-    );
-});
-
 
 // on off status update
 router.put('/api/onoff', function (req, res, next) {
@@ -180,6 +158,7 @@ router.put('/api/onoff', function (req, res, next) {
     });
 });
 
+//────────────────────────────────────────────────────────────────────────────────────────────//
 
 // init request
 router.delete('/api/init', function (req, res, next) {
