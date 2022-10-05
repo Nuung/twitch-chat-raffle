@@ -16,9 +16,10 @@ class MongoRepository():
             db_info["host"],
             int(db_info["port"]),
             connect=False,
-            username=db_info["username"],
-            password=db_info["password"],
-            authSource=db_info["role"]
+            # if you use AUTH, you have to fill up below
+            # username=db_info["username"],
+            # password=db_info["password"],
+            # authSource=db_info["role"]
         )
 
         self.db = self.client["twitch_raffle"]

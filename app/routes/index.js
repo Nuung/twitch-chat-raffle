@@ -8,8 +8,19 @@ const env = require('dotenv').config(); //add .env file
 const dbConfig = JSON.parse(env.parsed.DB_INFO);
 const pageTitle = env.parsed.PAGE_TITLE;
 
-// LOCAL DB connection
-mongoose.connect(`mongodb://${dbConfig.username}:${dbConfig.password}@${dbConfig.host}:${dbConfig.port}/${dbConfig.role}`, {
+// LOCAL DB connection with AUTH
+// mongoose.connect(`mongodb://${dbConfig.username}:${dbConfig.password}@${dbConfig.host}:${dbConfig.port}/${dbConfig.role}`, {
+//     dbName: `${dbConfig.database}`,
+//     useUnifiedTopology: true,
+//     useNewUrlParser: true,
+// })
+//     .then(() => console.log('DB Connected!'))
+//     .catch(err => {
+//         console.log("DB Connection Error: " + err.message);
+//     });
+
+// LOCAL DB connection without AUTH
+mongoose.connect(`mongodb://${dbConfig.host}:${dbConfig.port}`, {
     dbName: `${dbConfig.database}`,
     useUnifiedTopology: true,
     useNewUrlParser: true,
@@ -18,7 +29,6 @@ mongoose.connect(`mongodb://${dbConfig.username}:${dbConfig.password}@${dbConfig
     .catch(err => {
         console.log("DB Connection Error: " + err.message);
     });
-
 
 // load DB schema
 const Config = require("../models/config");
@@ -161,7 +171,7 @@ router.get('/api/prize', async (req, res, next) => {
             {
                 $sort: { 'count': -1 }
             }
-        ]);
+        ]).limit(100);
 
         const userArr = new Array();
         for (let i = 0; i < msgTotalGroupCount.length; i++) {

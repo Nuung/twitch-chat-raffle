@@ -27,6 +27,7 @@ services:
       - "3000:3000"
     environment:
       - MONGO_HOST=tcr-mongodb
+      - MONGO_PORT=28018
     networks:
       - twitch-chat-raffle-network
     depends_on:
@@ -36,6 +37,13 @@ services:
     image: tcr-crawler
     hostname: tcr-crawler
     container_name: tcr-crawler
+    volumes:
+      - ../crawler/logs:/crawler/logs
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGO_HOST=tcr-mongodb
+      - MONGO_PORT=28018      
     networks:
       - twitch-chat-raffle-network    
 
@@ -50,12 +58,11 @@ services:
       - ../mongodb/cnf:/etc/mongo
       - ../mongodb/log:/var/log/mongodb
     entrypoint: ["mongod", "-f", "/etc/mongo/mongod.conf"]
-    env_file: .env
     environment:
       TZ: Asia/Seoul
-      MONGO_INITDB_ROOT_USERNAME: "twitch_crawler_raffle"
-      MONGO_INITDB_ROOT_PASSWORD: "twitch_crawler_raffle123!"
-      MONGO_INITDB_DATABASE: "twitch_raffle"
+      # MONGO_INITDB_ROOT_USERNAME: "twitch_crawler_raffle"
+      # MONGO_INITDB_ROOT_PASSWORD: "twitch_crawler_raffle123!"
+      # MONGO_INITDB_DATABASE: "twitch_raffle"
     networks:
       - twitch-chat-raffle-network
     restart: always

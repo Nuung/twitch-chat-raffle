@@ -38,16 +38,18 @@ if __name__ == '__main__':
         datefmt='%Y-%m-%d_%H:%M:%S',
         handlers=[logging.FileHandler('./logs/twitch_chat_crawling.log', encoding='utf-8')]
     )    
+    try:
+        # db config
+        repo = MongoRepository()
 
-    # db config
-    repo = MongoRepository()
-
-    # twitch object만들고 바로 IRC
-    #######################################
-    # 1. db.config에서 nick_name, oauth_token, channel_name 가져와서 세팅 가능
-    #######################################
-    config_info = repo.get_crawler_config()
-    is_need_init = True
+        # twitch object만들고 바로 IRC
+        #######################################
+        # 1. db.config에서 nick_name, oauth_token, channel_name 가져와서 세팅 가능
+        #######################################
+        config_info = repo.get_crawler_config()
+        is_need_init = True
+    except Exception as e:
+        logging.error(f" while error: {e}, {type(e).__name__}, {type(e)} ]")
 
     while True:
         try:

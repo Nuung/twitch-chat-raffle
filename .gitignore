@@ -1,4 +1,10 @@
 
+# CUSTOM
+
+**/mongodb/data/*
+**/mongodb/log/*
+
+
 # Created by https://www.toptal.com/developers/gitignore/api/macos,python,git
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,python,git
 
