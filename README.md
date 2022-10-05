@@ -11,7 +11,7 @@
 ## Getting Start
 
 1. you dont need to register "dev.twitch.tv". 
-2. go >> https://www.learndatasci.com/tutorials/how-stream-text-data-twitch-sockets-python/ and get OAuth Token <br/>
+2. go >> https://twitchapps.com/tmi/ and get OAuth Token <br/>
     <img src="/github-readme-imgs/img1.png" width="600" />
 3. `git clone https://github.com/Nuung/twitch-chat-raffle.git` and `cd twitch-chat-raffle`
 4. go `./crawler/mongo.py - def db_migarte(self)` and change (line 37, 38, 39, 43, 44)
@@ -70,6 +70,12 @@
 2. If you want to change page logo, just change the file below
 - `/app/public/images/logo.png`
 - This task will be applied in real time by nginx. just refresh page.
+
+
+3. you can logs `crawler, mongodb, nginx` (see `docker-compose` file's volume)
+- `/crawler/logs`
+- `/mongodb/log`
+- `/nginx/log`
 
 ### append
 
