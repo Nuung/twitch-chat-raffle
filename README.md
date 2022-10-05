@@ -89,5 +89,4 @@
 --- 
 
 ## More About
-- [개백수7호](https://www.twitch.tv/ddubbu7)
-- 
+- [개백수7호](https://www.twitch.tv/ddubbu7) (not me)
