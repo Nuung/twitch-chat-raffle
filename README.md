@@ -11,7 +11,7 @@
 ## Getting Start
 
 1. you dont need to register "dev.twitch.tv". 
-2. go >> https://www.learndatasci.com/tutorials/how-stream-text-data-twitch-sockets-python/ and get OAuth Token
+2. go >> https://www.learndatasci.com/tutorials/how-stream-text-data-twitch-sockets-python/ and get OAuth Token <br/>
     <img src="/github-readme-imgs/img1.png" width="600" />
 3. `git clone https://github.com/Nuung/twitch-chat-raffle.git` and `cd twitch-chat-raffle`
 4. go `./crawler/mongo.py - def db_migarte(self)` and change (line 37, 38, 39, 43, 44)
@@ -28,10 +28,10 @@
 
     <img src="/github-readme-imgs/img2.png" width="1000" />
 
-    and if you use `docker desktop`, you can see the container list below
+    and if you use `docker desktop`, you can see the container list below <br/>
 
     <img src="/github-readme-imgs/img3.png" width="700" />
-7. it's done! just go `http:localhost`
+7. it's done! just go `http:localhost` <br/>
     <img src="/github-readme-imgs/img4.png" width="800" />
 
 ## Guide
@@ -41,15 +41,15 @@
 
 ### about page useage
 
-1. you can change config value, just click `Setting` button and change what you want
+1. you can change config value, just click `Setting` button and change what you want <br/>
     <img src="/github-readme-imgs/img5.png" width="400" />
 
 2. **🔴🔴 checkout 🔴🔴**, before change Setting(config) value, you have to **turn off** the crawling by clik `On` toggle button
 
-3. if you click the user list area, you can see what user chated
+3. if you click the user list area, you can see what user chated <br/>
     <img src="/github-readme-imgs/img6.png" width="400" />
 
-4. you want to do raffle, just clikc `Raffle` button
+4. you want to do raffle, just clikc `Raffle` button <br/>
     <img src="/github-readme-imgs/img7.png" width="400" />
 
     if you click the `OK` button, message database(collection in mongodb named `chat_msg_log`) will be initialize <br/>
