@@ -37,7 +37,7 @@
 ## Guide
 
 > you can see the video guide this youtube page
-> 
+> https://youtu.be/A73ys0J880g
 
 ### about page useage
 
