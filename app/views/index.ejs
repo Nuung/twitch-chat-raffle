@@ -19,11 +19,10 @@
     <div class="main">
         <div>
             <a href="https://twitchapps.com/tmi/" target="_blank">
-                <img id="logo-img" src="/images/logo2.png" />
+                <img id="logo-img" src="/images/logo.png" />
             </a>
-            <h1>개백수 7호의 채팅 라플 리더보드</h1>
+            <h1> <%= pageTitle %>  의 채팅 라플 리더보드</h1>
             <input id="onoff-btn" type="checkbox" checked data-toggle="toggle">
-            <button id="init-btn" type="button" class="btn action-btn">Init</button>
             <button id="setting-btn" type="button" class="btn action-btn" data-toggle="modal"
                 data-target="#settingModal">Setting</button><!-- Button trigger modal -->
             <button id="raffle-btn" type="button" class="btn action-btn">Raffle</button>
@@ -74,31 +73,113 @@
 </body>
 <script>
 
-    // Get Readey
-    // document.addEventListener("DOMContentLoaded", function () {
-    //     init();
-    // });
 
     // GET static DOM 
     const randerTarget = document.querySelector(".main");
-    const initBtn = document.getElementById("init-btn");
     const settingBtn = document.getElementById("setting-btn");
     const raffleBtn = document.getElementById("raffle-btn");
 
     // AJAX Custom
-    const ajaxCustom = (url, type, next) => {
-        $.ajax({
-            url: url,
-            type: type,
-            dataType: 'json',
-            success: function (response) {
-                next(response);
-            },
-            error: function (e) {
-                swal("Fail", `${e['result']}!`, "error");
-            }
-        });
+    const ajaxCustom = (url, type, body, next) => {
+        if (type === "GET") {
+            $.ajax({
+                url: url,
+                type: type,
+                dataType: 'json',
+                success: function (response) {
+                    next(response);
+                },
+                error: function (e) {
+                    swal("Fail", `${e['result']}!`, "error");
+                }
+            });
+        }
+        else {
+            $.ajax({
+                url: url,
+                type: type,
+                dataType: 'json',
+                data: body,
+                success: function (response) {
+                    next(response);
+                },
+                error: function (e) {
+                    swal("Fail", `${e['result']}!`, "error");
+                }
+            });
+        }
     }
+
+    // on / off -> /api/onoff with body.status
+    // GET Status of On Off
+    ajaxCustom("/api/on-off", "GET", null, (response) => {
+        if (response['result']) 
+            $('#onoff-btn').bootstrapToggle('on');
+        else 
+            $('#onoff-btn').bootstrapToggle('off');
+
+        // add Event
+        $('#onoff-btn').change(function () {
+            const status = { "status": $(this).prop('checked') }
+            ajaxCustom("api/on-off", "PUT", status, (response) => {
+                swal("Success", `${response['result']}`, "success");
+            });
+        });
+    });
+
+    // setting -> /api/config with body
+    // setting-request-form -> input-nick-name / input-oauth-token / input-channel-name
+    settingBtn.addEventListener('click', () => {
+        ajaxCustom("/api/config", "GET", null, (response) => {
+            // 1. get and setting up information
+            const targetModal = document.getElementById("settingModal");
+            targetModal.querySelector("#input-nick-name").value = response['result']['nick_name'];
+            targetModal.querySelector("#input-oauth-token").value = response['result']['oauth_token'];
+            targetModal.querySelector("#input-channel-name").value = response['result']['channel_name'];
+
+        });
+    });
+    document.getElementById("setting-request-btn").addEventListener('click', () => {
+        const formData = document.getElementById("setting-request-form");
+        const body = {
+            nick_name: formData.querySelector("#input-nick-name").value,
+            oauth_token: formData.querySelector("#input-oauth-token").value,
+            channel_name: formData.querySelector("#input-channel-name").value,   
+        };
+        // request for config update
+        ajaxCustom("/api/config", "PUT", body, (response) => {
+            swal("Success", `${response['result']}`, "success");
+        });
+    });
+
+
+    // raffle 
+    raffleBtn.addEventListener('click', () => {
+        ajaxCustom("/api/prize", "GET", null, (response) => {
+            swal({
+                title: "🔥 당첨자는 아래와 같습니다! 🔥",
+                text: `${response["result"]["_id"]} 님 축하합니다! \n \"OK\" 를 누르면 확정이 되고, 내역이 저장됩니다.`,
+                icon: "success",
+                buttons: true,
+            })
+            .then((willDelete) => {
+                if (willDelete) {
+                    const body = {
+                        "comment":"당첨자 저장",
+                        "username":response["result"]["_id"]
+                    };
+                    ajaxCustom("api/prize/init", "POST", body, (response) => {
+                        swal("라플 내용이 저장 되었고, 대화 내용은 모두 초기화 됩니다.");
+                    });
+                } 
+                else {
+                    swal("취소 되었습니다! 다시 한 번 Raffle 버튼을 눌러주세요!", {
+                        icon: "success",
+                    });
+                }
+            });
+        });
+    });
 
 
     // chat-log-li 에는 this(target-data-id) key에 따른 채팅 로그 pop up
@@ -112,13 +193,13 @@
                 swal("·····WAIT·····");
 
                 const targetId = event.target.getAttribute('target-data-id');
-                ajaxCustom(`/api/chat/${targetId}`, "GET", (response) => {
+                ajaxCustom(`/api/chat/${targetId}`, "GET", null, (response) => {
 
                     // make list of chat by str
                     let listOfChat = "";
                     for (let i = 0; i < response['result'].length; i++) {
                         const element = response['result'][i];
-                        listOfChat += `${element['dt']} : ${element['message']} \n`;
+                        listOfChat += `${element['created_at']} : ${element['message']} \n`;
                     }
 
                     // success
@@ -128,80 +209,6 @@
         })
     }
 
-    // chat-cnt-li 에는 this(target-data-id) key에 따른 cnt update가능
-
-    // init 
-    initBtn.addEventListener('click', () => {
-        ajaxCustom("/api/init", "DELETE", (response) => {
-            swal("Success", `${response['result']}`, "success");
-        });
-    });
-
-    // on / off -> /api/onoff with body.status
-    // GET Status of On Off
-    ajaxCustom("/api/onoff", "GET", (response) => {
-        if (response['result']['status']) $('#onoff-btn').bootstrapToggle('on');
-        else $('#onoff-btn').bootstrapToggle('off');
-
-        // add Event
-        $('#onoff-btn').change(function () {
-            $.ajax({
-                url: '/api/onoff',
-                type: 'PUT',
-                dataType: 'json',
-                data: { status: $(this).prop('checked') },
-                success: function (response) {
-                    swal("Success", `${response['result']}`, "success");
-                },
-                error: function (e) {
-                    swal("Fail", `${e['result']}!`, "error");
-                }
-            });
-        });
-    });
-
-    // setting -> /api/config with body
-    // setting-request-form -> input-nick-name / input-oauth-token / input-channel-name
-    settingBtn.addEventListener('click', () => {
-        ajaxCustom("/api/config", "GET", (response) => {
-            // 1. get and setting up information
-            const targetModal = document.getElementById("settingModal");
-            targetModal.querySelector("#input-nick-name").value = response['result']['nick_name'];
-            targetModal.querySelector("#input-oauth-token").value = response['result']['oauth_token'];
-            targetModal.querySelector("#input-channel-name").value = response['result']['channel_name'];
-
-        });
-    });
-    document.getElementById("setting-request-btn").addEventListener('click', () => {
-        const formData = document.getElementById("setting-request-form");
-        // request for config update
-        $.ajax({
-            url: '/api/config',
-            type: 'PUT',
-            dataType: 'json',
-            data: {
-                nick_name: formData.querySelector("#input-nick-name").value,
-                oauth_token: formData.querySelector("#input-oauth-token").value,
-                channel_name: formData.querySelector("#input-channel-name").value,
-            },
-            success: function (response) {
-                swal("Success", `${response['result']}`, "success");
-            },
-            error: function (e) {
-                swal("Fail", `${e['result']}!`, "error");
-            }
-        });
-    });
-
-
-
-    // raffle ~ run python3 process
-    raffleBtn.addEventListener('click', () => {
-        ajaxCustom("/api/raffle", "GET", (response) => {
-            swal("Success", `${response['result']}`, "success");
-        });
-    });
-
     // Long Polling
     /*
      https://developer.mozilla.org/ko/docs/Glossary/IIFE
@@ -209,40 +216,38 @@
      서버와 접속을 열어둔 상태에서 요청이 오면 바로 바로 처리한다. 
      요청이 없을시에는 리소스를 거의 먹지않는다.
     */
+    let originDashBoardData = {};
     (function boardUpdate() {
         $.ajax({
-            url: '/api/live',
+            url: '/api/chats/live',
             type: 'GET',
             dataType: 'json',
-            success: function (response) {
-                // 1. main의 ul 모두 삭제
-                const targetUl = randerTarget.querySelectorAll('ul');
-                for (let i = 0; i < targetUl.length; i++) targetUl[i].remove();
-
-                // 2. 받아온 result 값 value기반으로 정렬 
-                const sortedResult = Object.entries(response['result'])
-                    .sort(([, a], [, b]) => b - a)
-                    .reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
-
-                // 3. 정렬된 값 기준으로 랜더링 
-                let cnt = 1; // rank
-                for (const [key, value] of Object.entries(sortedResult)) {
-                    $('div.main').append(
-                        `
-                        <ul class="list-group list-group-horizontal leader-board-list">
-                            <li class="list-group-item"># ${cnt++}</li>
-                            <li class="list-group-item chat-log-li" target-data-id="${key}">${key}</li>
-                            <li class="list-group-item chat-cnt-li" target-data-id="${key}">${value}</li>
-                        </ul>
-                        `
-                    );
+            success: (response) => {
+                if (originDashBoardData != response["result"]) {                    
+                    // 1. main의 ul 모두 삭제
+                    const targetUl = randerTarget.querySelectorAll('ul');
+                    for (let i = 0; i < targetUl.length; i++) targetUl[i].remove();
+    
+                    // 2. 정렬된 값 기준으로 랜더링 
+                    for (let i = 0; i < response["result"].length; i++) {
+                        const element = response["result"][i];
+                        $('div.main').append(
+                            `
+                            <ul class="list-group list-group-horizontal leader-board-list">
+                                <li class="list-group-item"># ${(i + 1)}</li>
+                                <li class="list-group-item chat-log-li" target-data-id="${element["_id"]}">${element["_id"]}</li>
+                                <li class="list-group-item chat-cnt-li" target-data-id="${element["_id"]}">${element["count"]}</li>
+                            </ul>
+                            `
+                        );
+                    }
+                    // 3. add event
+                    addChatRequest();
                 }
 
-                // 4. add event
-                addChatRequest();
             },
             error: function (e) {
-                // console.log("ERROR : ", e);
+                console.log("ERROR : ", e);
             },
             timeout: 2000,
             complete: setTimeout(function () { boardUpdate(); }, 3000)

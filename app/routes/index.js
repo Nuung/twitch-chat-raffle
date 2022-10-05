@@ -2,11 +2,11 @@ const express = require('express');
 const mongoose = require('mongoose'); // for mongoDB
 const ObjectID = require('mongodb').ObjectID; // for mongoDB's OID
 const router = express.Router();
-const child_process = require('child_process'); // for process checking and running
 
 // env value
 const env = require('dotenv').config(); //add .env file 
 const dbConfig = JSON.parse(env.parsed.DB_INFO);
+const pageTitle = env.parsed.PAGE_TITLE;
 
 // LOCAL DB connection
 mongoose.connect(`mongodb://${dbConfig.username}:${dbConfig.password}@${dbConfig.host}:${dbConfig.port}/${dbConfig.role}`, {
@@ -22,153 +22,181 @@ mongoose.connect(`mongodb://${dbConfig.username}:${dbConfig.password}@${dbConfig
 
 // load DB schema
 const Config = require("../models/config");
+const ChatMsgLog = require("../models/chat_msg_log");
 const TwitchRaffleResult = require("../models/twitch_raffle_result");
-const TwitchChatDumps = require("../models/twitch_chat_dumps");
 
-//────────────────────────────────────────────────────────────────────────────────────────────//
-
-// login page
+// login, main page
 router.get('/', function (req, res, next) {
-    res.render('index');
-});
-
-// get 실시간 상황 
-router.get('/api/live', function (req, res, next) {
-    TwitchRaffleResult.findById({ "_id": ObjectID('6084495e957d77dac7e864e9') }, function (err, result) {
-        if (err) {
-            console.error(err);
-            return res.status(500).json({ result: `Fail: ${err}` });
-        }
-        else return res.status(200).json({ result: result['result_json'] });
-    });
-});
-
-// get 실시간 상황 Cnt by id!
-router.get('/api/live/:id', function (req, res, next) {
-    TwitchRaffleResult.findById({ "_id": ObjectID('6084495e957d77dac7e864e9') }, function (err, result) {
-        if (err) {
-            console.error(err);
-            return res.status(500).json({ result: `Fail: ${err}` });
-        }
-        else {
-            const result_json = result['result_json'];
-            for (const [key, value] of Object.entries(result_json)) {
-                if (key == req.params.id) {
-                    return res.status(200).json({ result: value });
-                }
-            }
-        }
-    });
+    res.render('index', {pageTitle});
 });
 
 //────────────────────────────────────────────────────────────────────────────────────────────//
 
-// get raffle result
-router.get('/api/raffle', function (req, res, next) {
-    const command = `python3 /home/ubuntu/twitch_calculation.py`;
-    child_process.exec(command, (err, stdout, stdin) => {
-        if (err) res.status(500).json({ result: err });
-        else res.status(200).json({ result: stdout });
-    });
+// get Configue
+router.get('/api/config', async (req, res, next) => {
+    try {
+        const targetConfig = await Config.find({});
+        return res.status(200).json({ result: targetConfig[0] });
+    }
+    catch (err) {
+        return res.status(500).json({ result: `Fail: ${err}` });
+    }
+});
+
+// config setting 
+router.put('/api/config', async (req, res, next) => {
+    try {
+        let targetConfig = await Config.find({});
+        targetConfig = targetConfig[0]
+        targetConfig.nick_name = req.body.nick_name;
+        targetConfig.oauth_token = req.body.oauth_token;
+        targetConfig.channel_name = req.body.channel_name;
+        targetConfig.updated_at = new Date();
+        await targetConfig.save();
+        return res.status(201).json({ result: `new Config set up success!` });
+    }
+    catch (err) {
+        return res.status(500).json({ result: `Fail: ${err}` });
+    }
+});
+
+// get status 
+router.get('/api/on-off', async (req, res, next) => {
+    try {
+        const targetConfig = await Config.find({})
+        return res.status(200).json({ result: targetConfig[0].status });
+    }
+    catch (err) {
+        return res.status(500).json({ result: `Fail: ${err}` });
+    }
+});
+
+// on off status update
+router.put('/api/on-off', async (req, res, next) => {
+
+    let changedStatus = false;
+    if (req.body.status == "true" || req.body.status === true) changedStatus = true;
+
+    try {
+        let targetConfig = await Config.find({})
+        targetConfig = targetConfig[0]
+        targetConfig.status = changedStatus
+        await targetConfig.save()
+        return res.status(201).json({ result: `ON/OFF Updated Well by ${req.body.status}` });
+    }
+    catch (err) {
+        return res.status(500).json({ result: `Fail: ${err}` });
+    }
 });
 
 //────────────────────────────────────────────────────────────────────────────────────────────//
 
 // get target ID's chat log
 router.get('/api/chat/:id', function (req, res, next) {
-    TwitchChatDumps.find({ "username": req.params.id }, function (err, result) {
+    ChatMsgLog.find({ "username": req.params.id }, function (err, result) {
         if (err) {
             console.error(err);
             return res.status(500).json({ result: `Fail: ${err}` });
         }
-        else return res.status(201).json({ result: result });
+        else return res.status(200).json({ result: result });
     });
 });
 
-//────────────────────────────────────────────────────────────────────────────────────────────//
-
-// get Configue
-router.get('/api/config', function (req, res, next) {
-    Config.findById({ "_id": ObjectID('60827e0d957d77dac7e864e8') }, function (err, result) {
-        if (err) {
-            console.error(err);
-            return res.status(500).json({ result: `Fail: ${err}` });
-        }
-        else res.status(200).json({ result: result });
-    });
-});
-
-// config setting 
-router.put('/api/config', function (req, res, next) {
-    Config.updateOne({ "_id": ObjectID('60827e0d957d77dac7e864e8') },
-        { "$set": { "nick_name": req.body.nick_name, "oauth_token": req.body.oauth_token, "channel_name": req.body.channel_name, "updated_at": new Date() } },
-        function (err, result) {
-            console.log(result);
-            if (err) {
-                console.error(err);
-                return res.status(500).json({ result: `Fail: ${err}` });
+// get 실시간 상황 
+router.get('/api/chats/live', async (req, res, next) => {
+    const targetConfig = await Config.find({});
+    const targetChannelName = `#${targetConfig[0]["channel_name"]}`;
+    try {
+        const msgTotalGroupCount = await ChatMsgLog.aggregate([
+            {
+                $match: { "channel": targetChannelName }
+            },
+            {
+                $group: {
+                    _id: "$username",
+                    count: { $sum: 1 }
+                }
+            },
+            {
+                $sort: { 'count': -1 }
             }
-            else res.status(201).json({ result: `new Config set up success!` });
-        }
-    );
+        ]).limit(100);
+        return res.status(200).json({ result: msgTotalGroupCount });
+    }
+    catch (err) {
+        return res.status(500).json({ result: `Fail: ${err}` });
+    }
 });
 
 //────────────────────────────────────────────────────────────────────────────────────────────//
 
-// get status 
-router.get('/api/onoff', function (req, res, next) {
-    mongoose.connection.db.collection("on_off_check", function (err, collection) {
-        if (err) {
-            console.error(err);
-            return res.status(500).json({ result: `Fail: ${err}` });
-        }
-        else {
-            collection.findOne({ "_id": ObjectID('6085c8b8957d77dac7e864ea') }, function (findOne_err, result) {
-                if (findOne_err) {
-                    console.error(findOne_err);
-                    return res.status(500).json({ result: `Fail: ${findOne_err}` });
+function randomChoice(p) {
+    let rnd = p.reduce((a, b) => a + b) * Math.random();
+    return p.findIndex(a => (rnd -= a) < 0);
+}
+
+function randomChoices(p, count) {
+    return Array.from(Array(count), randomChoice.bind(null, p));
+}
+
+// let result = randomChoices([0.1, 0, 0.3, 0.6, 0], 3);
+
+// 당첨자 정하기
+router.get('/api/prize', async (req, res, next) => {
+    try {
+        const targetConfig = await Config.find({});
+        const targetChannelName = `#${targetConfig[0]["channel_name"]}`;
+
+        const totalCount = await ChatMsgLog.count({ "channel": targetChannelName });
+        const msgTotalGroupCount = await ChatMsgLog.aggregate([
+            {
+                $match: { "channel": targetChannelName }
+            },
+            {
+                $group: {
+                    _id: "$username",
+                    count: { $sum: 1 }
                 }
-                else return res.status(200).json({ result: result });
-            });
+            },
+            {
+                $sort: { 'count': -1 }
+            }
+        ]);
+
+        const userArr = new Array();
+        for (let i = 0; i < msgTotalGroupCount.length; i++) {
+            userArr.push((msgTotalGroupCount[i]["count"] / totalCount) * 100);
         }
-    });
+
+        // 가중치 랜덤, 누적확률값
+        let prizeResult = msgTotalGroupCount[randomChoices(userArr, 1)];
+        while (prizeResult["_id"] == targetConfig[0]["nick_name"]) {
+            prizeResult = msgTotalGroupCount[randomChoices(userArr, 1)];
+        }
+        return res.status(200).json({ result: prizeResult });
+    }
+    catch (err) {
+        return res.status(500).json({ result: `Fail: ${err}` });
+    }
 });
 
-// on off status update
-router.put('/api/onoff', function (req, res, next) {
-    mongoose.connection.db.collection("on_off_check", function (err, collection) {
+
+// 당첨자 결과 저장 및 message 초기화 
+router.post('/api/prize/init', function (req, res, next) {
+    const { comment, username } = req.body;
+
+    ChatMsgLog.deleteMany({}, function (err, result) {
         if (err) {
             console.error(err);
             return res.status(500).json({ result: `Fail: ${err}` });
         }
         else {
-            let changedStatus = false;
-            if (req.body.status == "true") changedStatus = true;
-            collection.findOneAndUpdate({ "_id": ObjectID('6085c8b8957d77dac7e864ea') },
-                { "$set": { status: changedStatus } },
-                function (update_err, result) {
-                    if (update_err) {
-                        console.error(update_err);
-                        return res.status(500).json({ result: `Fail: ${update_err}` });
-                    }
-                    else return res.status(201).json({ result: `ON/OFF Updated Well by ${req.body.status}` });
-                }
-            );
-        }
-    });
-});
+            const newTwitchRaffleResult = {
+                "type": comment,
+                "username": username
+            };
 
-//────────────────────────────────────────────────────────────────────────────────────────────//
-
-// init request
-router.delete('/api/init', function (req, res, next) {
-    TwitchChatDumps.deleteMany({}, function (err, result) {
-        if (err) {
-            console.error(err);
-            return res.status(500).json({ result: `Fail: ${err}` });
-        }
-        else {
-            TwitchRaffleResult.updateOne({ "type": "Leaderboard" }, { "$set": { "result_json": "" } }, function (err, result) {
+            TwitchRaffleResult.create(newTwitchRaffleResult, function (err, result) {
                 if (err) {
                     console.error(err);
                     return res.status(500).json({ result: `Fail: ${err}` });

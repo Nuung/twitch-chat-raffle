@@ -14,4 +14,4 @@ RUN pip install --upgrade pip \
 EXPOSE 8000
 
 # run the command
-CMD ["python", "-u", "./twitch_irc_chat.py"]
+CMD ["python", "-u", "./main.py"]

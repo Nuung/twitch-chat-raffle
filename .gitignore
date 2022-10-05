@@ -154,8 +154,6 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-# .env
-.env/
 .venv/
 env/
 venv/
@@ -289,11 +287,6 @@ typings/
 
 # Yarn Integrity file
 .yarn-integrity
-
-# dotenv environment variables file
-.env
-.env.test
-.env*.local
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache

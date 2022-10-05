@@ -8,10 +8,8 @@ services:
     volumes:
       - ../nginx/conf/nginx.conf:/etc/nginx/nginx.conf
       - ../nginx/conf.d:/etc/nginx/conf.d
+      - ../nginx/log:/var/log/nginx
       - ../app/public:/etc/nginx/public
-      # - ../fpm-be/media:/etc/nginx/media
-      # - ../fpm-fe-html/:/usr/share/nginx
-      - ./nginx/log:/var/log/nginx
     ports:
       - "80:80"
     environment:
@@ -37,7 +35,7 @@ services:
   tcr-crawler:
     image: tcr-crawler
     hostname: tcr-crawler
-    container_name: tcr-crawler    
+    container_name: tcr-crawler
     networks:
       - twitch-chat-raffle-network    
 
@@ -46,7 +44,7 @@ services:
     hostname: tcr-mongodb
     container_name: tcr-mongodb
     ports:
-      - "27017:27017"
+      - "28018:28018"
     volumes:
       - ../mongodb/data:/data/db
       - ../mongodb/cnf:/etc/mongo
@@ -55,6 +53,9 @@ services:
     env_file: .env
     environment:
       TZ: Asia/Seoul
+      MONGO_INITDB_ROOT_USERNAME: "twitch_crawler_raffle"
+      MONGO_INITDB_ROOT_PASSWORD: "twitch_crawler_raffle123!"
+      MONGO_INITDB_DATABASE: "twitch_raffle"
     networks:
       - twitch-chat-raffle-network
     restart: always
